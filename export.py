@@ -1,21 +1,22 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 """
 A minimal builder.
 """
 
 import argparse
-import boto3.session
 import contextlib
 import datetime
 import os
-import paramiko
 import pipes
-import scp
 import socket
 import subprocess
 import sys
 import time
 import uuid
+
+import boto3.session
+import paramiko
+import scp
 
 EXPORT_SCRIPT = "scripts/export-vmdk.sh"
 PACKAGE_SCRIPT = "scripts/package-vagrant-box.sh"
@@ -31,7 +32,7 @@ def get_first(boto_collection):
     Cannot use standard next() since boto3 collections are not iterators.
     """
     for resource in boto_collection:
-        print "get", repr(resource)
+        print(("get", repr(resource)))
         return resource
     raise Exception("NotFound")
 
@@ -42,9 +43,9 @@ def resource_cleanup(debug=False):
     try:
         yield cleanup_stack
     except Exception as e:
-        print "exception", e
+        print(("exception", e))
         if debug:
-            raw_input("Press return to continue: ")
+            input("Press return to continue: ")
         raise
     finally:
         for cleanup_function in reversed(cleanup_stack):
@@ -52,22 +53,22 @@ def resource_cleanup(debug=False):
 
 
 def defer_delete(stack, resource):
-    print "create", repr(resource)
+    print(("create", repr(resource)))
 
     def cleanup():
-        print "delete", repr(resource)
+        print(("delete", repr(resource)))
         resource.delete()
 
     stack.append(cleanup)
 
 
 def defer_terminate(stack, instance):
-    print "create", repr(instance)
+    print(("create", repr(instance)))
 
     def cleanup():
-        print "terminate", repr(instance)
+        print(("terminate", repr(instance)))
         instance.terminate()
-        print "wait for termination", repr(instance)
+        print(("wait for termination", repr(instance)))
         instance.wait_until_terminated()
 
     stack.append(cleanup)
@@ -88,7 +89,7 @@ def get_image(ec2, owner, name):
 
 def wait_until_volume_state(volume, state):
     while volume.state != state:
-        print "wait", repr(volume), volume.state, "->", state
+        print(("wait", repr(volume), volume.state, "->", state))
         time.sleep(POLL_SECONDS)
         volume.reload()
 
@@ -98,21 +99,21 @@ def attach_ebs_image(ec2, instance, image, device_name):
     volume = ec2.create_volume(SnapshotId=image.block_device_mappings[0]["Ebs"]["SnapshotId"],
                                AvailabilityZone=instance.placement["AvailabilityZone"],
                                VolumeType="gp2")
-    print "create", repr(volume)
+    print(("create", repr(volume)))
 
     wait_until_volume_state(volume, "available")
 
     # Attach volume.
     volume.attach_to_instance(InstanceId=instance.id,
                               Device=device_name)
-    print "attach", repr(volume), "to", repr(instance)
+    print(("attach", repr(volume), "to", repr(instance)))
 
     wait_until_volume_state(volume, "in-use")
 
     # Ensure volume deleted after instance termination.
     instance.modify_attribute(BlockDeviceMappings=[dict(
-            DeviceName=device_name,
-            Ebs=dict(DeleteOnTermination=True),
+        DeviceName=device_name,
+        Ebs=dict(DeleteOnTermination=True),
     )])
 
 
@@ -128,21 +129,21 @@ def connect_ssh(username, host, private_key_file):
                                look_for_keys=False,
                                compress=True)
         except socket.error:
-            print "wait ssh agent"
+            print("wait ssh agent")
             time.sleep(POLL_SECONDS)
 
     return ssh_client
 
 
 def provision_file_put(ssh_client, local_file, remote_file):
-    print "put", local_file, remote_file
+    print(("put", local_file, remote_file))
     scp_client = scp.SCPClient(ssh_client.get_transport())
     scp_client.put(local_file, remote_file)
     scp_client.close()
 
 
 def provision_file_get(ssh_client, remote_file, local_file):
-    print "get", remote_file, local_file
+    print(("get", remote_file, local_file))
     scp_client = scp.SCPClient(ssh_client.get_transport())
     scp_client.get(remote_file, local_file)
     scp_client.close()
@@ -155,7 +156,7 @@ def copy_lines(input, output):
 
 def provision_shell(ssh_client, argv, get_pty=False):
     command = " ".join(pipes.quote(arg) for arg in argv)
-    print "shell", command
+    print(("shell", command))
     stdin, stdout, stderr = ssh_client.exec_command(command, get_pty=get_pty)
 
     stdin.close()
@@ -170,7 +171,7 @@ def provision_shell(ssh_client, argv, get_pty=False):
 
 
 def local_cmd(cmd):
-    print " ".join(cmd)
+    print(" ".join(cmd))
     subprocess.check_call(cmd)
 
 
@@ -273,10 +274,10 @@ def main():
 
         # Enable ssh access
         sg.authorize_ingress(IpPermissions=[dict(
-                IpProtocol="tcp",
-                FromPort=22,
-                ToPort=22,
-                IpRanges=[dict(CidrIp="0.0.0.0/0")],
+            IpProtocol="tcp",
+            FromPort=22,
+            ToPort=22,
+            IpRanges=[dict(CidrIp="0.0.0.0/0")],
         )])
 
         # Launch builder EC2 instance
@@ -286,10 +287,10 @@ def main():
                                                   KeyName=key_pair.name,
                                                   InstanceType=args.instance_type,
                                                   NetworkInterfaces=[dict(
-                                                          DeviceIndex=0,
-                                                          SubnetId=subnet_id,
-                                                          Groups=[sg.id],
-                                                          AssociatePublicIpAddress=True,
+                                                      DeviceIndex=0,
+                                                      SubnetId=subnet_id,
+                                                      Groups=[sg.id],
+                                                      AssociatePublicIpAddress=True,
                                                   )]))
         defer_terminate(cleanup, instance)
 
@@ -304,8 +305,8 @@ def main():
             os.chmod(PRIVATE_KEY_FILE, 0o600)
             f.write(key_pair.key_material)
 
-        print "To access instance for debugging:"
-        print "  ssh -i {} {}@{}".format(PRIVATE_KEY_FILE, args.builder_username, instance.public_ip_address)
+        print("To access instance for debugging:")
+        print("  ssh -i {} {}@{}".format(PRIVATE_KEY_FILE, args.builder_username, instance.public_ip_address))
 
         ssh_client = connect_ssh(args.builder_username, instance.public_ip_address, PRIVATE_KEY_FILE)
 
