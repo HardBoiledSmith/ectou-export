@@ -96,9 +96,9 @@ umount $MNT
 
 # Install VirtualBox rpm to run VBoxManage convertdd
 # Warnings about compiling vboxdrv kernel module are expected
-wget http://download.virtualbox.org/virtualbox/5.2.2/VirtualBox-5.2-5.2.2_119230_el6-1.x86_64.rpm
-echo "1d1cceeefb1928740a4981f4e6ca23d6 VirtualBox-5.2-5.2.2_119230_el6-1.x86_64.rpm" | md5sum -c /dev/stdin
-rpm -i --nodeps VirtualBox-5.2-5.2.2_119230_el6-1.x86_64.rpm
+wget http://download.virtualbox.org/virtualbox/5.2.4/VirtualBox-5.2-5.2.4_119785_el6-1.x86_64.rpm
+echo "acd65bf76027d36bc58ca6ea4e00023c VirtualBox-5.2-5.2.4_119785_el6-1.x86_64.rpm" | md5sum -c /dev/stdin
+rpm -i --nodeps VirtualBox-5.2-5.2.4_119785_el6-1.x86_64.rpm
 
 VBoxManage convertdd "${device}" "${vmdk}" --format VMDK
 chmod 644 "${vmdk}"
