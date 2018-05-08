@@ -16,8 +16,8 @@ Examples:
 
 .. code-block:: sh
 
-    ./export.py --ami-name amzn-ami-hvm-2016.03.3.x86_64-gp2 [--vpc-name name] [--yum-proxy url]
-    ./export.py --ami-name amzn-ami-hvm-2017.09.1.20180103-x86_64-gp2 --region ap-northeast-2
+    ./export.py --ami-name amzn-ami-hvm-2018.03.0.20180412-x86_64-gp2 [--vpc-name name] [--yum-proxy url]
+    ./export.py --ami-name amzn-ami-hvm-2018.03.0.20180412-x86_64-gp2 --region ap-northeast-2
 
 These examples export vagrant box files named ``AMI_NAME-DATETIME.box`` and ``AMI_NAME-DATETIME-guest.box``.
 
@@ -52,13 +52,13 @@ Host software
 
 The software has been tested using:
 
-- VirtualBox 5.2.4
-- Vagrant 2.0.1
-- Python 3.6.2
+- VirtualBox 5.2.10
+- Vagrant 2.1.1
+- Python 3.6.4
 
-  - boto3 1.5.7
-  - paramiko 2.3.1
-  - scp 0.10.2
+  - boto3 1.7.15
+  - paramiko 2.4.1
+  - scp 0.11.0
 
 Example on MacOS X host using brew:
 
