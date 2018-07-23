@@ -202,8 +202,8 @@ def get_parser():
     g.add_argument("--vpc-id")
     g.add_argument("--vpc-name")
     g.add_argument("--subnet-id")
-    g.add_argument("--instance-type",
-                   default="c4.large")
+    g.add_argument("--instance-type", default="c4.large")
+    # g.add_argument("--instance-type", default="c5.large")
     g.add_argument("--device-name",
                    default="/dev/xvdf",
                    help="Attach source image to this device.")
@@ -281,17 +281,31 @@ def main():
         )])
 
         # Launch builder EC2 instance
-        instance = get_first(ec2.create_instances(ImageId=builder_image.id,
-                                                  MinCount=1,
-                                                  MaxCount=1,
-                                                  KeyName=key_pair.name,
-                                                  InstanceType=args.instance_type,
-                                                  NetworkInterfaces=[dict(
-                                                      DeviceIndex=0,
-                                                      SubnetId=subnet_id,
-                                                      Groups=[sg.id],
-                                                      AssociatePublicIpAddress=True,
-                                                  )]))
+        instance = get_first(
+            ec2.create_instances(
+                ImageId=builder_image.id,
+                MinCount=1,
+                MaxCount=1,
+                KeyName=key_pair.name,
+                InstanceType=args.instance_type,
+                BlockDeviceMappings=[
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "VolumeSize": 100
+                        }
+                    }
+                ],
+                NetworkInterfaces=[
+                    dict(
+                        DeviceIndex=0,
+                        SubnetId=subnet_id,
+                        Groups=[sg.id],
+                        AssociatePublicIpAddress=True,
+                    )
+                ]
+            )
+        )
         defer_terminate(cleanup, instance)
 
         instance.create_tags(Tags=[{"Key": "Name", "Value": run_name}])
@@ -312,8 +326,10 @@ def main():
 
         # Export device to vmdk
         provision_file_put(ssh_client, EXPORT_SCRIPT, "export.sh")
-        provision_shell(ssh_client, ["sudo", "bash", "export.sh", args.device_name, "export.vmdk", args.yum_proxy],
-                        get_pty=True)
+        provision_shell(
+            ssh_client, ["sudo", "bash", "export.sh", args.device_name, "export.vmdk", args.yum_proxy], get_pty=True,
+            # ssh_client, ["sudo", "bash", "export.sh", "/dev/nvme1", "export.vmdk", args.yum_proxy], get_pty=True,
+        )
         provision_file_get(ssh_client, "export.vmdk", vmdk)
 
     # Package vmdk into vagrant box

@@ -18,6 +18,7 @@ yum_proxy="$3"
 # Mount image
 MNT=/mnt
 mount "${device}1" $MNT
+# mount "${device}n1p1" $MNT
 
 # Add temporary resolv.conf for chroot network access.
 cp /etc/resolv.conf $MNT/etc/resolv.conf
@@ -96,9 +97,10 @@ umount $MNT
 
 # Install VirtualBox rpm to run VBoxManage convertdd
 # Warnings about compiling vboxdrv kernel module are expected
-wget http://download.virtualbox.org/virtualbox/5.2.4/VirtualBox-5.2-5.2.4_119785_el6-1.x86_64.rpm
-echo "acd65bf76027d36bc58ca6ea4e00023c VirtualBox-5.2-5.2.4_119785_el6-1.x86_64.rpm" | md5sum -c /dev/stdin
-rpm -i --nodeps VirtualBox-5.2-5.2.4_119785_el6-1.x86_64.rpm
+wget http://download.virtualbox.org/virtualbox/5.2.16/VirtualBox-5.2-5.2.16_123759_el6-1.x86_64.rpm
+echo "e61a8a03cb5c82be24c5beb00d143fc0 VirtualBox-5.2-5.2.16_123759_el6-1.x86_64.rpm" | md5sum -c /dev/stdin
+rpm -i --nodeps VirtualBox-5.2-5.2.16_123759_el6-1.x86_64.rpm
 
 VBoxManage convertdd "${device}" "${vmdk}" --format VMDK
+# VBoxManage convertdd "${device}n1p1" "${vmdk}" --format VMDK
 chmod 644 "${vmdk}"
