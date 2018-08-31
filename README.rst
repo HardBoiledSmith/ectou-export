@@ -16,8 +16,8 @@ Examples:
 
 .. code-block:: sh
 
-    ./export.py --ami-name amzn-ami-hvm-2018.03.0.20180622-x86_64-gp2 [--vpc-name name] [--yum-proxy url]
-    ./export.py --ami-name amzn-ami-hvm-2018.03.0.20180622-x86_64-gp2 --region ap-northeast-2
+    ./export.py --ami-name amzn-ami-hvm-2018.03.0.20180811-x86_64-gp2 [--vpc-name name] [--yum-proxy url]
+    ./export.py --ami-name amzn-ami-hvm-2018.03.0.20180811-x86_64-gp2 --region ap-northeast-2
 
 These examples export vagrant box files named ``AMI_NAME-DATETIME.box`` and ``AMI_NAME-DATETIME-guest.box``.
 
