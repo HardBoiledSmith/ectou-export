@@ -11,8 +11,8 @@ while minimizing differences between `EC2`_ and local development environments.
 
 Examples:
 ```
-./export.py --ami-name amzn-ami-hvm-2018.03.0.20190826-x86_64-gp2 [--vpc-name name] [--yum-proxy url]
-./export.py --ami-name amzn-ami-hvm-2018.03.0.20190826-x86_64-gp2 --region ap-northeast-2
+./export.py --ami-name amzn-ami-hvm-2018.03.0.20200206.0-x86_64-gp2 [--vpc-name name] [--yum-proxy url]
+./export.py --ami-name amzn-ami-hvm-2018.03.0.20200206.0-x86_64-gp2 --region ap-northeast-2
 ```
 
 These examples export vagrant box files named `AMI_NAME-DATETIME.box` and `AMI_NAME-DATETIME-guest.box`.
